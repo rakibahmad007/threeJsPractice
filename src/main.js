@@ -37,11 +37,11 @@ orbitControls.update();
 const gridHelper = new THREE.GridHelper(15, 50);
 scene.add(gridHelper);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 10); // this 1 indicates light intensity
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // this 1 indicates light intensity
 scene.add(ambientLight);
 
 // Apply directional light
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 100); // Adjusted intensity
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 2); // Adjusted intensity
 scene.add(directionalLight);
 directionalLight.position.set(-5, 8, 0);
 
@@ -53,9 +53,11 @@ const dLightShadowHelper =
 new THREE.CameraHelper(directionalLight.shadow.camera);
 scene.add(dLightShadowHelper);
 
-scene.background = new THREE.Color(0x5500AF); // Same color as the fog
+// scene.background = new THREE.Color(0x5500AF); // Same color as the fog
+renderer.setClearColor(0x550); //  another way to declare background color
 
 scene.fog = new THREE.FogExp2(0x5500AF, 0.09);
+//With this method, the density of the fog increases exponentially as the distance from the camera grows.
 
 
 
@@ -77,13 +79,31 @@ const box = new THREE.Mesh(geometry, material);
 box.position.y = 2;
 scene.add(box);
 
-const sphereGeometry = new THREE.SphereGeometry(0.75, 50, 50); // the first value zooms the object, the next values increase the no of segments
-const sphereMaterial = new THREE.MeshStandardMaterial({
-  color: 0x0000ff,
+
+// Load Brazuca texture
+const textureLoader = new THREE.TextureLoader();
+const brazucaTexture = textureLoader.load('brazuca.jpg');
+
+brazucaTexture.wrapS = THREE.RepeatWrapping;
+brazucaTexture.wrapT = THREE.RepeatWrapping;
+brazucaTexture.repeat.set(1, 1); // Adjust repetition if needed
+
+
+const sphereGeometry = new THREE.SphereGeometry(0.5, 100, 100); // the first value zooms the object, the next values increase the no of segments
+const sphereMaterial = new THREE.MeshPhysicalMaterial({
+//   color: 0x0000ff,
+     map: brazucaTexture,
+     roughness: 0.8, // Adjust surface roughness
+     metalness: 0.1, // Makes it look more realistic
+     shininess: 100, // Adjust for a glossy look
+     emissive: 0x111111,
+
+
 });
 const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphereMesh.position.y = 4;
 sphereMesh.position.x = 4;
+
 scene.add(sphereMesh);
 
 const gui = new GUI();
