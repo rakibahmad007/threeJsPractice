@@ -13,31 +13,6 @@
 // //but ekta jhamela scrolling er option chole ashbe, jeta amra chai na
 // //amra index.html e giye style er under body r bhitor e margin:0 kore dibo
 
-// //what we did etokhon pre tasks to setup a scene
-
-// const scene = new THREE.Scene();
-// //scene er shathe camera o lagbe nahole shooting kemne korbo
-
-// const camera = new THREE.PerspectiveCamera(
-//     75,
-//     window.innerWidth, window.innerHeight,
-//     0.1,
-//     1000
-
-// )
-
-// //field of view sufficient range: 40-80
-// //aspect ratio
-// //near clipping planes
-// //far clipping planes 
-// // the less the difference between planes, the better the performance
-
-// //  ei camera ar scene ke render korte hobe
-// renderer.render(scene,camera);
-
-
-// // helper use korbo to visualize 3D coordinate system, AxesHelper
-
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GUI } from "lil-gui";
@@ -65,24 +40,37 @@ scene.add(gridHelper);
 const ambientLight = new THREE.AmbientLight(0xffffff, 10); // this 1 indicates light intensity
 scene.add(ambientLight);
 
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
-const box = new THREE.Mesh(geometry, material);
-box.position.y = 2;
-// box.scale.y =2;
-// box.scale.x = 2;
-// box.scale.z = 2;
-scene.add(box);
+// Apply directional light
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 100); // Adjusted intensity
+scene.add(directionalLight);
+directionalLight.position.set(-5, 8, 0);
 
+// Directional light helper to visualize light direction
+const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 7);
+scene.add(dLightHelper);
+
+const dLightShadowHelper = 
+new THREE.CameraHelper(directionalLight.shadow.camera);
+scene.add(dLightShadowHelper);
+
+
+// Fix: Plane and sphere objects should be added after they are declared
 const planeGeometry = new THREE.PlaneGeometry(15, 15);
-const planeMaterial = new THREE.MeshBasicMaterial({
-  // meshBasic material doesnt need any lighting
+const planeMaterial = new THREE.MeshStandardMaterial({
+  // meshBasic material doesn't need any lighting
   side: THREE.DoubleSide,
+  color: 0xff1111,
 });
 
 const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
 scene.add(planeMesh);
 planeMesh.rotation.x = -0.5 * Math.PI;
+
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+const box = new THREE.Mesh(geometry, material);
+box.position.y = 2;
+scene.add(box);
 
 const sphereGeometry = new THREE.SphereGeometry(0.75, 50, 50); // the first value zooms the object, the next values increase the no of segments
 const sphereMaterial = new THREE.MeshStandardMaterial({
@@ -91,7 +79,6 @@ const sphereMaterial = new THREE.MeshStandardMaterial({
 const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
 sphereMesh.position.y = 4;
 sphereMesh.position.x = 4;
-// sphereMesh.position.z = 4;
 scene.add(sphereMesh);
 
 const gui = new GUI();
@@ -128,10 +115,14 @@ function animate(time) {
   // Rotating the box
   box.rotation.x = time / 1000;
   box.rotation.y = time / 1000;
+  const minBoxY = 0.75
+  box.position.y =minBoxY + 3 * Math.abs(Math.sin(step));
+
 
   // Bouncing sphere animation
+  const minY = 0.75; // The minimum height where the ball touches the plane (same as sphere radius)
   step += options.speed;
-  sphereMesh.position.y = 3 * Math.abs(Math.sin(step));
+  sphereMesh.position.y = minY + 3 * Math.abs(Math.sin(step));
 
   renderer.render(scene, camera);
 
@@ -148,3 +139,9 @@ renderer.setAnimationLoop(animate);
 //   }
 //   renderer.setAnimationLoop(animate);  
   
+renderer.shadowMap.enabled = true;
+planeMesh.receiveShadow = true;
+sphereMesh.castShadow = true;
+box.castShadow = true
+directionalLight.castShadow = true;
+directionalLight.shadow.camera.top = 7; // allows us to see the shadow on the planeMesh
