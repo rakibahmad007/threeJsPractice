@@ -40,7 +40,6 @@
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
 import { GUI } from "lil-gui";
 
 const renderer = new THREE.WebGLRenderer();
@@ -57,24 +56,27 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const orbitControls = new OrbitControls(camera, renderer.domElement);
-
-camera.position.set(5, 2, 5);
+camera.position.set(2, 2, 5);
 orbitControls.update();
-
-// const axesHelper = new THREE.AxesHelper();
-// scene.add(axesHelper);
 
 const gridHelper = new THREE.GridHelper(15, 50);
 scene.add(gridHelper);
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 10); // this 1 indicates light intensity
+scene.add(ambientLight);
+
 const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
 const box = new THREE.Mesh(geometry, material);
 box.position.y = 2;
+// box.scale.y =2;
+// box.scale.x = 2;
+// box.scale.z = 2;
 scene.add(box);
 
 const planeGeometry = new THREE.PlaneGeometry(15, 15);
 const planeMaterial = new THREE.MeshBasicMaterial({
+  // meshBasic material doesnt need any lighting
   side: THREE.DoubleSide,
 });
 
@@ -82,31 +84,59 @@ const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
 scene.add(planeMesh);
 planeMesh.rotation.x = -0.5 * Math.PI;
 
-const sphereGeometry = new THREE.SphereGeometry(2, 50, 50);
-const sphereMaterial = new THREE.MeshBasicMaterial({
+const sphereGeometry = new THREE.SphereGeometry(0.75, 50, 50); // the first value zooms the object, the next values increase the no of segments
+const sphereMaterial = new THREE.MeshStandardMaterial({
   color: 0x0000ff,
 });
 const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphereMesh.position.y = 3;
-sphereMesh.position.x = 3;
+sphereMesh.position.y = 4;
+sphereMesh.position.x = 4;
+// sphereMesh.position.z = 4;
 scene.add(sphereMesh);
-
-
 
 const gui = new GUI();
 
 const options = {
   color: 0x0000ff,
+  wireframe: false, // this property lets us see the skeleton of the sphere
+  speed: 0.01,
+  lightSwitch: true, // Light is on by default
 };
 
+// GUI for changing the color of sphere and box
 gui.addColor(options, "color").onChange(function (e) {
   sphereMesh.material.color.set(e);
+  box.material.color.set(e);
 });
 
+// GUI for toggling wireframe mode
+gui.add(options, "wireframe").onChange(function (e) {
+  sphereMesh.material.wireframe = e;
+});
+
+// GUI for adjusting speed of sphere movement
+gui.add(options, "speed", 0, 0.1);
+
+// GUI for toggling ambient light on/off
+gui.add(options, "lightSwitch").name("Toggle Light").onChange(function (e) {
+  ambientLight.visible = e; // Enable/disable light
+});
+
+let step = 0;
+
 function animate(time) {
+  // Rotating the box
   box.rotation.x = time / 1000;
   box.rotation.y = time / 1000;
+
+  // Bouncing sphere animation
+  step += options.speed;
+  sphereMesh.position.y = 3 * Math.abs(Math.sin(step));
+
   renderer.render(scene, camera);
+
+  // This will create a loop that causes the renderer to draw the scene
+  // every time the screen is refreshed (typically 60 times per second).
 }
 
 renderer.setAnimationLoop(animate);
