@@ -53,6 +53,11 @@ const dLightShadowHelper =
 new THREE.CameraHelper(directionalLight.shadow.camera);
 scene.add(dLightShadowHelper);
 
+scene.background = new THREE.Color(0x5500AF); // Same color as the fog
+
+scene.fog = new THREE.FogExp2(0x5500AF, 0.09);
+
+
 
 // Fix: Plane and sphere objects should be added after they are declared
 const planeGeometry = new THREE.PlaneGeometry(15, 15);
