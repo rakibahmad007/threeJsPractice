@@ -13,6 +13,9 @@
 // //but ekta jhamela scrolling er option chole ashbe, jeta amra chai na
 // //amra index.html e giye style er under body r bhitor e margin:0 kore dibo
 
+//GLSL -> Graphics Library Shading Language
+//GL Transmission Format)
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GUI } from "lil-gui";
